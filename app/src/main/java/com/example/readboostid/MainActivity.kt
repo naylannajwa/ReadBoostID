@@ -1,47 +1,50 @@
-package com.example.readboostid
+// File: MainActivity.kt
+package com.readboost.id
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.readboostid.ui.theme.ReadBoostIDTheme
+import androidx.navigation.compose.rememberNavController
+import com.readboost.id.presentation.navigation.NavGraph
+import com.readboost.id.ui.theme.ReadBoostTheme
 
+/**
+ * ReadBoost ID - Aplikasi Literasi Digital
+ * Tugas Besar PAB 2025
+ *
+ * Anggota Kelompok:
+ * 1. Nama: [NAMA ANGGOTA 1], NIM: [NIM ANGGOTA 1]
+ * 2. Nama: [NAMA ANGGOTA 2], NIM: [NIM ANGGOTA 2]
+ * 3. Nama: [NAMA ANGGOTA 3], NIM: [NIM ANGGOTA 3]
+ * 4. Nama: [NAMA ANGGOTA 4], NIM: [NIM ANGGOTA 4]
+ *
+ * Username & Password (jika diperlukan):
+ * - Admin: username: admin, password: admin123
+ * - User: username: user, password: user123
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            ReadBoostIDTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+        try {
+            setContent {
+                ReadBoostTheme {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        val navController = rememberNavController()
+                        NavGraph(navController = navController)
+                    }
                 }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Show error to user if needed
+            finish()
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    ReadBoostIDTheme {
-        Greeting("Android")
     }
 }
