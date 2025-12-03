@@ -2,12 +2,14 @@
 package com.readboost.id
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.readboost.id.presentation.navigation.NavGraph
 import com.readboost.id.ui.theme.ReadBoostTheme
@@ -36,13 +38,37 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        val navController = rememberNavController()
-                        NavGraph(navController = navController)
+                        // Temporary simple UI for debugging
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(text = "ReadBoost ID - Debug Mode")
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(onClick = {
+                                // Navigate to actual app
+                                setContent {
+                                    ReadBoostTheme {
+                                        Surface(
+                                            modifier = Modifier.fillMaxSize(),
+                                            color = MaterialTheme.colorScheme.background
+                                        ) {
+                                            val navController = rememberNavController()
+                                            NavGraph(navController = navController)
+                                        }
+                                    }
+                                }
+                            }) {
+                                Text("Start App")
+                            }
+                        }
                     }
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            Log.e("MainActivity", "Critical error in setContent", e)
             // Show error to user if needed
             finish()
         }
