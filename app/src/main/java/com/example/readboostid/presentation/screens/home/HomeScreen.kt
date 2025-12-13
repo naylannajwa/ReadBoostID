@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import androidx.compose.ui.text.style.TextOverflow
@@ -198,7 +199,7 @@ fun HeaderSection(
                 Spacer(modifier = Modifier.width(12.dp))
                 // Nama aplikasi
                 Text(
-                    text = "ReadBoost",
+                    text = "ReadBoost ID",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
@@ -207,13 +208,19 @@ fun HeaderSection(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // User greeting
-            Text(
-                text = "Halo, User!",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Medium,
-                color = Color.White
-            )
+            // User greeting - centered
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Halo, User!",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -238,13 +245,20 @@ fun HeaderSection(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Description about ReadBoost
-            Text(
-                text = "Platform pembelajaran yang membantu Anda meningkatkan pengetahuan melalui artikel berkualitas dalam berbagai kategori menarik.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.9f),
-                lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.2f
-            )
+            // Description about ReadBoost - maximum 2 lines, centered
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Platform pembelajaran yang membantu Anda meningkatkan pengetahuan melalui artikel berkualitas dalam berbagai kategori menarik.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.9f),
+                    lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.2f,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2
+                )
+            }
 
             Spacer(modifier = Modifier.height(20.dp))
 
