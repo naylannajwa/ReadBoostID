@@ -194,13 +194,13 @@ fun HeaderSection(
                     imageVector = Icons.Default.MenuBook,
                     contentDescription = "ReadBoost Logo",
                     tint = Color.White,
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(28.dp)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 // Nama aplikasi
                 Text(
                     text = "ReadBoost ID",
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
