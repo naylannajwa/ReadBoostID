@@ -15,17 +15,41 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Devices
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.readboost.id.ReadBoostApplication
 import com.readboost.id.data.model.Article
-import com.readboost.id.data.model.UserProgress
 import com.readboost.id.presentation.viewmodel.ViewModelFactory
 import com.readboost.id.ui.theme.ReadBoostTheme
+
+// Mock author names untuk artikel
+private fun getMockAuthor(article: Article): String {
+    val authors = listOf(
+        "Antonio Bonabeno",
+        "Alvin Kleon",
+        "John Doe",
+        "Jane Smith",
+        "Robert Wilson",
+        "Emily Johnson",
+        "Michael Brown"
+    )
+    return authors[article.id % authors.size]
+}
+
+// Helper function untuk mendapatkan image URL
+// Jika imageUrl ada di Article, gunakan itu. Jika tidak, gunakan placeholder
+private fun getArticleImageUrl(article: Article): String {
+    return article.imageUrl ?: "https://picsum.photos/seed/${article.id}/300/400"
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,12 +62,11 @@ fun HomeScreen(
     val context = LocalContext.current
     val app = context.applicationContext as? ReadBoostApplication
 
-    // ViewModel initialization with proper factory
+    // ViewModel initialization
     val homeViewModel = viewModel<HomeViewModel>(
         factory = if (app?.isAppContainerInitialized == true) {
             ViewModelFactory(app.appContainer)
         } else {
-            // Fallback - will use default factory
             null
         }
     )
@@ -51,36 +74,17 @@ fun HomeScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("ReadBoost ID") },
-                actions = {
-                    IconButton(onClick = onNavigateToProfile) {
-                        Icon(Icons.Default.Person, contentDescription = "Profile")
-                    }
-                }
-            )
+            // Empty top bar karena kita menggunakan custom header
+            Spacer(modifier = Modifier.height(0.dp))
         },
         bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    selected = true,
-                    onClick = { },
-                    icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-                    label = { Text("Home") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = onNavigateToArticleList,
-                    icon = { Icon(Icons.Default.List, contentDescription = "Articles") },
-                    label = { Text("Articles") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = onNavigateToLeaderboard,
-                    icon = { Icon(Icons.Default.Star, contentDescription = "Leaderboard") },
-                    label = { Text("Leaderboard") }
-                )
-            }
+            BottomNavigationBar(
+                selectedRoute = "home",
+                onNavigateToHome = { },
+                onNavigateToArticleList = onNavigateToArticleList,
+                onNavigateToLeaderboard = onNavigateToLeaderboard,
+                onNavigateToProfile = onNavigateToProfile
+            )
         }
     ) { paddingValues ->
         if (uiState.isLoading) {
@@ -96,57 +100,57 @@ fun HomeScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .padding(paddingValues)
             ) {
-                // User Progress Card
+                // Header Section
                 item {
-                    UserProgressCard(
-                        totalXP = uiState.userProgress?.totalXP ?: 0,
-                        streakDays = uiState.userProgress?.streakDays ?: 0,
-                        dailyTarget = uiState.userProgress?.dailyTarget ?: 5
+                    HeaderSection(
+                        searchQuery = "",
+                        onSearchQueryChange = { }
                     )
                 }
 
-                // Daily Target Section
+                // New Collection Section
                 item {
-                    Text(
-                        text = "Target Harian",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
+                    Spacer(modifier = Modifier.height(24.dp))
+                    NewCollectionSection(
+                        articles = uiState.newCollectionArticles,
+                        onArticleClick = onNavigateToArticle
                     )
                 }
 
+                // Category Row
                 item {
-                    DailyTargetCard(
-                        targetMinutes = uiState.userProgress?.dailyTarget ?: 5
-                    )
-                }
-
-                // Recent Articles Section
-                item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Artikel Terbaru",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                        TextButton(onClick = onNavigateToArticleList) {
-                            Text("Lihat Semua")
+                    Spacer(modifier = Modifier.height(24.dp))
+                    CategoryRow(
+                        selectedCategory = uiState.selectedCategory,
+                        onCategorySelected = { category ->
+                            homeViewModel.filterByCategory(category)
                         }
-                    }
+                    )
                 }
 
-                items(uiState.articles) { article ->
-                    ArticleCard(
-                        article = article,
-                        onClick = { onNavigateToArticle(article.id) }
+                // Article List
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    // Debug: Tampilkan jumlah artikel
+                    if (uiState.filteredArticles.isEmpty() && uiState.allArticles.isNotEmpty()) {
+                        Text(
+                            text = "Debug: Total artikel: ${uiState.allArticles.size}, Filtered: ${uiState.filteredArticles.size}, Category: ${uiState.selectedCategory}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                    ArticleList(
+                        articles = uiState.filteredArticles,
+                        onArticleClick = onNavigateToArticle
                     )
+                }
+
+                // Bottom spacing untuk navigation bar
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
@@ -154,102 +158,385 @@ fun HomeScreen(
 }
 
 @Composable
-fun UserProgressCard(
-    totalXP: Int,
-    streakDays: Int,
-    dailyTarget: Int
+fun HeaderSection(
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
+    // Background biru dengan rounded bottom
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF1976D2), // Primary blue
+                        Color(0xFF1565C0)  // Slightly darker blue
+                    )
+                ),
+                shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
+            )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 24.dp)
         ) {
-            Text(
-                text = "Progress Kamu",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(12.dp))
+            // Logo dan Nama Aplikasi
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
             ) {
-                ProgressItem(
-                    icon = "⭐",
-                    label = "Total XP",
-                    value = totalXP.toString()
+                // Logo icon
+                Icon(
+                    imageVector = Icons.Default.MenuBook,
+                    contentDescription = "ReadBoost Logo",
+                    tint = Color.White,
+                    modifier = Modifier.size(32.dp)
                 )
-                ProgressItem(
-                    icon = "🔥",
-                    label = "Streak",
-                    value = "$streakDays hari"
-                )
-                ProgressItem(
-                    icon = "🎯",
-                    label = "Target",
-                    value = "$dailyTarget min"
+                Spacer(modifier = Modifier.width(12.dp))
+                // Nama aplikasi
+                Text(
+                    text = "ReadBoost",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
                 )
             }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Search Bar
+            SearchBar(
+                query = searchQuery,
+                onQueryChange = onSearchQueryChange
+            )
         }
     }
 }
 
 @Composable
-fun ProgressItem(icon: String, label: String, value: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = icon, style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = value,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-        )
-    }
+fun SearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit
+) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        modifier = Modifier.fillMaxWidth(),
+        placeholder = {
+            Text(
+                text = "What would you like to read?",
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        },
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Search",
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        },
+        shape = RoundedCornerShape(12.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            unfocusedContainerColor = Color.White.copy(alpha = 0.95f),
+            focusedContainerColor = Color.White,
+            unfocusedBorderColor = Color.Transparent,
+            focusedBorderColor = MaterialTheme.colorScheme.primary
+        ),
+        singleLine = true
+    )
 }
 
 @Composable
-fun DailyTargetCard(targetMinutes: Int) {
-    Card(
-        modifier = Modifier.fillMaxWidth()
+fun NewCollectionSection(
+    articles: List<Article>,
+    onArticleClick: (Int) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                Text(
-                    text = "Baca $targetMinutes menit hari ini",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
+            Text(
+                text = "New Collection",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            TextButton(onClick = { }) {
+                Text("See all")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(horizontal = 4.dp)
+        ) {
+            items(articles) { article ->
+                NewCollectionCard(
+                    article = article,
+                    onClick = { onArticleClick(article.id) }
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun NewCollectionCard(
+    article: Article,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .width(160.dp)
+            .height(200.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = getCategoryColor(article.category)
+        )
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            // Gambar cover artikel
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(getArticleImageUrl(article))
+                    .crossfade(true)
+                    .build(),
+                contentDescription = article.title,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+            
+            // Gradient overlay untuk readability
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.7f)
+                            )
+                        )
+                    )
+            )
+
+            // Content overlay
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.Start
+            ) {
+                // Kategori
                 Text(
-                    text = "Raih XP dan tingkatkan streak!",
+                    text = article.category,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.White.copy(alpha = 0.9f),
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                // Judul artikel
+                Text(
+                    text = article.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CategoryRow(
+    selectedCategory: String,
+    onCategorySelected: (String) -> Unit
+) {
+    val categories = listOf("Populer", "Ilmiah", "Fantasi", "Bisnis", "Teknologi", "Seni")
+
+    LazyRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(horizontal = 20.dp)
+    ) {
+        items(categories) { category ->
+            CategoryChip(
+                category = category,
+                isSelected = category == selectedCategory,
+                onClick = { onCategorySelected(category) }
+            )
+        }
+    }
+}
+
+@Composable
+fun CategoryChip(
+    category: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    FilterChip(
+        selected = isSelected,
+        onClick = onClick,
+        label = {
+            Text(
+                text = category,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+            )
+        },
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    )
+}
+
+@Composable
+fun ArticleList(
+    articles: List<Article>,
+    onArticleClick: (Int) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+    ) {
+        if (articles.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Tidak ada artikel tersedia",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
+        } else {
+            articles.forEach { article ->
+                ArticleListItem(
+                    article = article,
+                    author = getMockAuthor(article),
+                    onClick = { onArticleClick(article.id) }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun ArticleListItem(
+    article: Article,
+    author: String,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Thumbnail gambar
+            Box(
+                modifier = Modifier
+                    .width(80.dp)
+                    .height(80.dp)
+                    .clip(RoundedCornerShape(8.dp))
+            ) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(getArticleImageUrl(article))
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = article.title,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            // Content
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Kategori
+                Text(
+                    text = article.category,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Judul artikel
+                Text(
+                    text = article.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Nama penulis
+                Text(
+                    text = author,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+
+            // Arrow icon
             Icon(
-                imageVector = Icons.Default.CheckCircle,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(32.dp)
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = "Open article",
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .size(24.dp)
             )
         }
     }
 }
 
+// ArticleCard untuk digunakan di ArticleListScreen
 @Composable
 fun ArticleCard(
     article: Article,
@@ -258,7 +545,12 @@ fun ArticleCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -293,7 +585,8 @@ fun ArticleCard(
                 text = article.content.take(100) + "...",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                maxLines = 2
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.height(8.dp))
             Row(
@@ -316,150 +609,132 @@ fun ArticleCard(
     }
 }
 
-// Preview Functions - Full Screen
+@Composable
+fun BottomNavigationBar(
+    selectedRoute: String,
+    onNavigateToHome: () -> Unit,
+    onNavigateToArticleList: () -> Unit,
+    onNavigateToLeaderboard: () -> Unit,
+    onNavigateToProfile: () -> Unit
+) {
+    NavigationBar {
+        NavigationBarItem(
+            selected = selectedRoute == "home",
+            onClick = onNavigateToHome,
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Home,
+                    contentDescription = "Home"
+                )
+            },
+            label = { Text("Home") }
+        )
+        NavigationBarItem(
+            selected = selectedRoute == "article",
+            onClick = onNavigateToArticleList,
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Article,
+                    contentDescription = "Artikel"
+                )
+            },
+            label = { Text("Artikel") }
+        )
+        NavigationBarItem(
+            selected = selectedRoute == "leaderboard",
+            onClick = onNavigateToLeaderboard,
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = "Leaderboard"
+                )
+            },
+            label = { Text("Leaderboard") }
+        )
+        NavigationBarItem(
+            selected = selectedRoute == "profile",
+            onClick = onNavigateToProfile,
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Profile"
+                )
+            },
+            label = { Text("Profile") }
+        )
+    }
+}
+
+// Helper function untuk mendapatkan warna berdasarkan kategori
+fun getCategoryColor(category: String): Color {
+    return when (category.lowercase()) {
+        "art", "seni" -> Color(0xFFFFD54F) // Yellow
+        "design", "desain" -> Color(0xFFFFA726) // Orange
+        "science", "ilmiah", "sains" -> Color(0xFF42A5F5) // Blue
+        "business", "bisnis" -> Color(0xFF66BB6A) // Green
+        "technology", "teknologi" -> Color(0xFFAB47BC) // Purple
+        "fantasy", "fantasi" -> Color(0xFFEC407A) // Pink
+        else -> Color(0xFF78909C) // Default gray
+    }
+}
+
+// Preview Functions
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(
-    showBackground = true,
-    device = Devices.PIXEL_4,
-    showSystemUi = true,
-    name = "Home Screen - Full"
-)
+@Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
     ReadBoostTheme {
         Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("ReadBoost ID") },
-                    actions = {
-                        IconButton(onClick = {}) {
-                            Icon(Icons.Default.Person, contentDescription = "Profile")
-                        }
-                    }
-                )
-            },
             bottomBar = {
-                NavigationBar {
-                    NavigationBarItem(
-                        selected = true,
-                        onClick = { },
-                        icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-                        label = { Text("Home") }
-                    )
-                    NavigationBarItem(
-                        selected = false,
-                        onClick = {},
-                        icon = { Icon(Icons.Default.List, contentDescription = "Articles") },
-                        label = { Text("Articles") }
-                    )
-                    NavigationBarItem(
-                        selected = false,
-                        onClick = {},
-                        icon = { Icon(Icons.Default.Star, contentDescription = "Leaderboard") },
-                        label = { Text("Leaderboard") }
-                    )
-                }
+                BottomNavigationBar(
+                    selectedRoute = "home",
+                    onNavigateToHome = {},
+                    onNavigateToArticleList = {},
+                    onNavigateToLeaderboard = {},
+                    onNavigateToProfile = {}
+                )
             }
         ) { paddingValues ->
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .padding(paddingValues)
             ) {
                 item {
-                    UserProgressCard(
-                        totalXP = 250,
-                        streakDays = 7,
-                        dailyTarget = 5
+                    HeaderSection(
+                        searchQuery = "",
+                        onSearchQueryChange = {}
                     )
                 }
                 item {
-                    Text(
-                        text = "Target Harian",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
+                    Spacer(modifier = Modifier.height(24.dp))
+                    NewCollectionSection(
+                        articles = listOf(
+                            Article(id = 1, title = "Gestalt", content = "Art content", duration = 5, category = "Art", xp = 15),
+                            Article(id = 2, title = "Modern Design", content = "Design content", duration = 4, category = "Design", xp = 12),
+                            Article(id = 3, title = "Astronomy", content = "Science content", duration = 6, category = "Science", xp = 18)
+                        ),
+                        onArticleClick = {}
                     )
                 }
                 item {
-                    DailyTargetCard(targetMinutes = 5)
+                    Spacer(modifier = Modifier.height(24.dp))
+                    CategoryRow(
+                        selectedCategory = "Populer",
+                        onCategorySelected = {}
+                    )
                 }
                 item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Artikel Terbaru",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                        TextButton(onClick = {}) {
-                            Text("Lihat Semua")
-                        }
-                    }
-                }
-                items(listOf(
-                    Article(id = 1, title = "Memahami Kecerdasan Buatan (AI)", content = "Kecerdasan Buatan atau Artificial Intelligence (AI) adalah simulasi kecerdasan manusia yang diprogram dalam mesin. AI memungkinkan komputer untuk belajar dari pengalaman.", duration = 5, category = "Teknologi", difficulty = "Dasar", xp = 15),
-                    Article(id = 2, title = "Psikologi Kebahagiaan", content = "Kebahagiaan adalah kondisi emosional yang ditandai dengan perasaan positif seperti kepuasan, kegembiraan, dan makna hidup.", duration = 4, category = "Psikologi", difficulty = "Dasar", xp = 12)
-                )) { article ->
-                    ArticleCard(article = article, onClick = {})
+                    Spacer(modifier = Modifier.height(16.dp))
+                    ArticleList(
+                        articles = listOf(
+                            Article(id = 1, title = "Show Your Work", content = "Management content", duration = 5, category = "Management", xp = 15),
+                            Article(id = 2, title = "Steal Like Designer", content = "Science content", duration = 4, category = "Science", xp = 12)
+                        ),
+                        onArticleClick = {}
+                    )
                 }
             }
         }
-    }
-}
-
-// Component Previews
-@Preview(showBackground = true)
-@Composable
-fun UserProgressCardPreview() {
-    ReadBoostTheme {
-        UserProgressCard(
-            totalXP = 250,
-            streakDays = 7,
-            dailyTarget = 5
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ProgressItemPreview() {
-    ReadBoostTheme {
-        ProgressItem(
-            icon = "⭐",
-            label = "Total XP",
-            value = "250"
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DailyTargetCardPreview() {
-    ReadBoostTheme {
-        DailyTargetCard(targetMinutes = 5)
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ArticleCardPreview() {
-    ReadBoostTheme {
-        ArticleCard(
-            article = Article(
-                id = 1,
-                title = "Memahami Kecerdasan Buatan (AI)",
-                content = "Kecerdasan Buatan atau Artificial Intelligence (AI) adalah simulasi kecerdasan manusia yang diprogram dalam mesin. AI memungkinkan komputer untuk belajar dari pengalaman, menyesuaikan dengan input baru, dan melakukan tugas-tugas yang biasanya memerlukan kecerdasan manusia.",
-                duration = 5,
-                category = "Teknologi",
-                difficulty = "Dasar",
-                xp = 15
-            ),
-            onClick = {}
-        )
     }
 }

@@ -19,12 +19,12 @@ import com.readboost.id.ui.theme.ReadBoostTheme
  * Tugas Besar PAB 2025
  *
  * Anggota Kelompok:
- * 1. Nama: [NAMA ANGGOTA 1], NIM: [NIM ANGGOTA 1]
- * 2. Nama: [NAMA ANGGOTA 2], NIM: [NIM ANGGOTA 2]
- * 3. Nama: [NAMA ANGGOTA 3], NIM: [NIM ANGGOTA 3]
- * 4. Nama: [NAMA ANGGOTA 4], NIM: [NIM ANGGOTA 4]
+ * 1. Nama: [NAYLANNAJWA JIHANA UMMA], NIM: [23523183]
+ * 2. Nama: [ERFINA SAFITRI], NIM: [23523192]
+ * 3. Nama: [PAMELA NAJLA GHASSANI], NIM: [23523249]
+ * 4. Nama: [ANINDYA AYU NABILAH], NIM: [23523268]
  *
- * Username & Password (jika diperlukan):
+ * Username & Password:
  * - Admin: username: admin, password: admin123
  * - User: username: user, password: user123
  */

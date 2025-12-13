@@ -16,5 +16,6 @@ data class Article(
     val duration: Int, // dalam menit
     val category: String, // Sains, Teknologi, Psikologi, dll
     val difficulty: String = "Dasar", // Dasar, Menengah, Lanjut
-    val xp: Int = 10
+    val xp: Int = 10,
+    val imageUrl: String? = null // URL gambar artikel
 ) : Parcelable

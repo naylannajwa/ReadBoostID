@@ -77,6 +77,7 @@ dependencies {
     // === Room ===
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
+    implementation(libs.volley)
     ksp("androidx.room:room-compiler:2.6.1")
 
     // === Retrofit + OkHttp ===
@@ -94,6 +95,9 @@ dependencies {
 
     // === DataStore ===
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+
+    // === Coil for Image Loading ===
+    implementation("io.coil-kt:coil-compose:2.5.0")
 
     // === Testing ===
     testImplementation("junit:junit:4.13.2")
