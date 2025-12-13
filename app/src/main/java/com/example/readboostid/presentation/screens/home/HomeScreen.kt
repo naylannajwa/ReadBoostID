@@ -115,7 +115,8 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(24.dp))
                     NewCollectionSection(
                         articles = uiState.newCollectionArticles,
-                        onArticleClick = onNavigateToArticle
+                        onArticleClick = onNavigateToArticle,
+                        onNavigateToArticleList = onNavigateToArticleList
                     )
                 }
 
@@ -143,7 +144,7 @@ fun HomeScreen(
                         )
                     }
                     ArticleList(
-                        articles = uiState.filteredArticles,
+                        articles = uiState.filteredArticles.take(5), // Limit to maximum 5 articles per category
                         onArticleClick = onNavigateToArticle
                     )
                 }
@@ -206,6 +207,47 @@ fun HeaderSection(
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // User greeting
+            Text(
+                text = "Halo, User!",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Medium,
+                color = Color.White
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Horizontal ReadBoost image
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp),
+                shape = RoundedCornerShape(12.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data("https://picsum.photos/seed/readboost/800/300")
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "ReadBoost Banner",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Description about ReadBoost
+            Text(
+                text = "Platform pembelajaran yang membantu Anda meningkatkan pengetahuan melalui artikel berkualitas dalam berbagai kategori menarik.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = 0.9f),
+                lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.2f
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
             // Search Bar
             SearchBar(
                 query = searchQuery,
@@ -251,7 +293,8 @@ fun SearchBar(
 @Composable
 fun NewCollectionSection(
     articles: List<Article>,
-    onArticleClick: (Int) -> Unit
+    onArticleClick: (Int) -> Unit,
+    onNavigateToArticleList: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -269,8 +312,8 @@ fun NewCollectionSection(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            TextButton(onClick = { }) {
-                Text("See all")
+            TextButton(onClick = onNavigateToArticleList) {
+                Text("lihat semua")
             }
         }
 
@@ -714,7 +757,8 @@ fun HomeScreenPreview() {
                             Article(id = 2, title = "Modern Design", content = "Design content", duration = 4, category = "Design", xp = 12),
                             Article(id = 3, title = "Astronomy", content = "Science content", duration = 6, category = "Science", xp = 18)
                         ),
-                        onArticleClick = {}
+                        onArticleClick = {},
+                        onNavigateToArticleList = {}
                     )
                 }
                 item {
@@ -730,7 +774,7 @@ fun HomeScreenPreview() {
                         articles = listOf(
                             Article(id = 1, title = "Show Your Work", content = "Management content", duration = 5, category = "Management", xp = 15),
                             Article(id = 2, title = "Steal Like Designer", content = "Science content", duration = 4, category = "Science", xp = 12)
-                        ),
+                        ).take(5), // Limit to maximum 5 articles
                         onArticleClick = {}
                     )
                 }
