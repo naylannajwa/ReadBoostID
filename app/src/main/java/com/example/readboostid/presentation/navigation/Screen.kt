@@ -3,6 +3,8 @@ package com.readboost.id.presentation.navigation
 
 sealed class Screen(val route: String) {
     object Splash : Screen("splash")
+    object Login : Screen("login")
+    object Registration : Screen("registration")
     object Home : Screen("home")
     object ArticleList : Screen("article_list")
     object ArticleDetail : Screen("article_detail/{articleId}") {

@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -63,6 +64,11 @@ fun HomeScreen(
     val context = LocalContext.current
     val app = context.applicationContext as? ReadBoostApplication
 
+    // Get current user name
+    val currentUserName = remember {
+        app?.appContainer?.userPreferences?.getCurrentUser()?.fullName ?: "User"
+    }
+
     // ViewModel initialization
     val homeViewModel = viewModel<HomeViewModel>(
         factory = if (app?.isAppContainerInitialized == true) {
@@ -107,7 +113,8 @@ fun HomeScreen(
                 item {
                     HeaderSection(
                         searchQuery = "",
-                        onSearchQueryChange = { }
+                        onSearchQueryChange = { },
+                        userName = currentUserName
                     )
                 }
 
@@ -162,7 +169,8 @@ fun HomeScreen(
 @Composable
 fun HeaderSection(
     searchQuery: String,
-    onSearchQueryChange: (String) -> Unit
+    onSearchQueryChange: (String) -> Unit,
+    userName: String = "User"
 ) {
     // Background biru dengan rounded bottom
     Box(
@@ -191,7 +199,7 @@ fun HeaderSection(
             ) {
                 // Logo icon
                 Icon(
-                    imageVector = Icons.Default.MenuBook,
+                    imageVector = Icons.AutoMirrored.Filled.MenuBook,
                     contentDescription = "ReadBoost Logo",
                     tint = Color.White,
                     modifier = Modifier.size(28.dp)
@@ -214,7 +222,7 @@ fun HeaderSection(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Halo, User!",
+                    text = "Halo, $userName!",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Medium,
                     color = Color.White,

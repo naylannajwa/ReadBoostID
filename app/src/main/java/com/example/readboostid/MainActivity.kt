@@ -38,31 +38,8 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        // Temporary simple UI for debugging
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(text = "ReadBoost ID - Debug Mode")
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Button(onClick = {
-                                // Navigate to actual app
-                                setContent {
-                                    ReadBoostTheme {
-                                        Surface(
-                                            modifier = Modifier.fillMaxSize(),
-                                            color = MaterialTheme.colorScheme.background
-                                        ) {
-                                            val navController = rememberNavController()
-                                            NavGraph(navController = navController)
-                                        }
-                                    }
-                                }
-                            }) {
-                                Text("Start App")
-                            }
-                        }
+                        val navController = rememberNavController()
+                        NavGraph(navController = navController)
                     }
                 }
             }

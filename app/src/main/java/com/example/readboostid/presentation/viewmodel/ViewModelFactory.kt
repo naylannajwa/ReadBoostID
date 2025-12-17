@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.readboost.id.di.AppContainer
 import com.readboost.id.presentation.screens.article.ArticleDetailViewModel
 import com.readboost.id.presentation.screens.article.ArticleViewModel
+import com.readboost.id.presentation.screens.auth.LoginViewModel
+import com.readboost.id.presentation.screens.auth.RegistrationViewModel
 import com.readboost.id.presentation.screens.home.HomeViewModel
 import com.readboost.id.presentation.screens.leaderboard.LeaderboardViewModel
 import com.readboost.id.presentation.screens.notes.NotesViewModel
@@ -32,6 +34,12 @@ class ViewModelFactory(
             }
             modelClass.isAssignableFrom(LeaderboardViewModel::class.java) -> {
                 LeaderboardViewModel(appContainer.userDataRepository) as T
+            }
+            modelClass.isAssignableFrom(LoginViewModel::class.java) -> {
+                LoginViewModel(appContainer.userRepository, appContainer.userPreferences) as T
+            }
+            modelClass.isAssignableFrom(RegistrationViewModel::class.java) -> {
+                RegistrationViewModel(appContainer.userRepository) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }

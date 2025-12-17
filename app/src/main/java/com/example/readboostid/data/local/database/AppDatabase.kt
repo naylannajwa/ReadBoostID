@@ -8,6 +8,7 @@ import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.readboost.id.data.local.dao.*
 import com.readboost.id.data.model.*
+import java.security.MessageDigest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -19,9 +20,10 @@ import kotlinx.coroutines.launch
         Notes::class,
         UserProgress::class,
         Leaderboard::class,
-        AdminUser::class
+        AdminUser::class,
+        User::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -30,6 +32,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun notesDao(): NotesDao
     abstract fun userProgressDao(): UserProgressDao
     abstract fun leaderboardDao(): LeaderboardDao
+    abstract fun userDao(): UserDao
 
     companion object {
         @Volatile
@@ -89,6 +92,7 @@ abstract class AppDatabase : RoomDatabase() {
             val articleDao = database.articleDao()
             val userProgressDao = database.userProgressDao()
             val leaderboardDao = database.leaderboardDao()
+            val userDao = database.userDao()
 
             // Insert dummy articles
             val articles = listOf(
@@ -448,6 +452,36 @@ Konservasi hutan hujan tropis Indonesia sangat penting untuk menjaga keanekaraga
                 Leaderboard(username = "Fitri Handayani", totalXP = 250, rank = 10)
             )
             leaderboardDao.insertAllLeaderboard(leaderboards)
+
+            // Insert dummy users for testing
+            val dummyUsers = listOf(
+                User(
+                    username = "user",
+                    email = "user@test.com",
+                    passwordHash = hashPassword("user123"),
+                    fullName = "User Test"
+                ),
+                User(
+                    username = "admin",
+                    email = "admin@test.com",
+                    passwordHash = hashPassword("admin123"),
+                    fullName = "Admin Test"
+                ),
+                User(
+                    username = "nayla",
+                    email = "nayla@test.com",
+                    passwordHash = hashPassword("nayla123"),
+                    fullName = "Nayla Jihana"
+                )
+            )
+            dummyUsers.forEach { userDao.insertUser(it) }
+        }
+
+        private fun hashPassword(password: String): String {
+            val bytes = password.toByteArray()
+            val md = MessageDigest.getInstance("SHA-256")
+            val digest = md.digest(bytes)
+            return digest.fold("") { str, it -> str + "%02x".format(it) }
         }
     }
 }

@@ -8,6 +8,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.readboost.id.presentation.screens.splash.SplashScreen
+import com.readboost.id.presentation.screens.auth.LoginScreen
+import com.readboost.id.presentation.screens.auth.RegistrationScreen
 import com.readboost.id.presentation.screens.home.HomeScreen
 import com.readboost.id.presentation.screens.article.ArticleListScreen
 import com.readboost.id.presentation.screens.article.ArticleDetailScreen
@@ -20,7 +22,7 @@ import com.readboost.id.presentation.screens.settings.SettingsScreen
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    startDestination: String = Screen.Splash.route
+    startDestination: String = Screen.Login.route
 ) {
     NavHost(
         navController = navController,
@@ -28,9 +30,32 @@ fun NavGraph(
     ) {
         composable(Screen.Splash.route) {
             SplashScreen(
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Screen.Login.route) {
+            LoginScreen(
                 onNavigateToHome = {
                     navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                },
+                onNavigateToRegister = {
+                    navController.navigate(Screen.Registration.route)
+                }
+            )
+        }
+
+        composable(Screen.Registration.route) {
+            RegistrationScreen(
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Registration.route) { inclusive = true }
                     }
                 }
             )

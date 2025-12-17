@@ -3,9 +3,11 @@ package com.readboost.id.di
 
 import android.content.Context
 import android.util.Log
+import com.readboost.id.data.local.UserPreferences
 import com.readboost.id.data.local.database.AppDatabase
 import com.readboost.id.domain.repository.ArticleRepository
 import com.readboost.id.domain.repository.UserDataRepository
+import com.readboost.id.domain.repository.UserRepository
 
 class AppContainer(private val context: Context) {
 
@@ -34,5 +36,19 @@ class AppContainer(private val context: Context) {
         )
         Log.d("AppContainer", "UserDataRepository initialized successfully")
         repo
+    }
+
+    val userRepository: UserRepository by lazy {
+        Log.d("AppContainer", "Initializing userRepository...")
+        val repo = com.readboost.id.data.repository.UserRepositoryImpl(database.userDao())
+        Log.d("AppContainer", "UserRepository initialized successfully")
+        repo
+    }
+
+    val userPreferences: UserPreferences by lazy {
+        Log.d("AppContainer", "Initializing userPreferences...")
+        val prefs = UserPreferences(context)
+        Log.d("AppContainer", "UserPreferences initialized successfully")
+        prefs
     }
 }

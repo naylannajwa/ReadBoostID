@@ -17,11 +17,11 @@ import kotlinx.coroutines.delay
 import android.util.Log
 
 @Composable
-fun SplashScreen(onNavigateToHome: () -> Unit) {
+fun SplashScreen(onNavigateToLogin: () -> Unit) {
     LaunchedEffect(Unit) {
         try {
             delay(2000)
-            onNavigateToHome()
+            onNavigateToLogin()
         } catch (e: Exception) {
             // If navigation fails, show error
             Log.e("SplashScreen", "Navigation failed", e)
@@ -69,6 +69,6 @@ fun SplashScreen(onNavigateToHome: () -> Unit) {
 @Composable
 fun SplashScreenPreview() {
     ReadBoostTheme {
-        SplashScreen(onNavigateToHome = {})
+        SplashScreen(onNavigateToLogin = {})
     }
 }
