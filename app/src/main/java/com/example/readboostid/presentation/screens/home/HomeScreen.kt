@@ -50,7 +50,7 @@ private fun getMockAuthor(article: Article): String {
 // Helper function untuk mendapatkan image URL
 // Jika imageUrl ada di Article, gunakan itu. Jika tidak, gunakan placeholder
 private fun getArticleImageUrl(article: Article): String {
-    return article.imageUrl ?: "https://picsum.photos/seed/${'$'}{article.id}/300/400"
+    return article.imageUrl ?: "https://picsum.photos/seed/${article.id}/300/400"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -178,7 +178,7 @@ fun HomeScreen(
                     // Debug: Tampilkan jumlah artikel
                     if (uiState.filteredArticles.isEmpty() && uiState.allArticles.isNotEmpty()) {
                         Text(
-                            text = "Debug: Total artikel: ${'$'}{uiState.allArticles.size}, Filtered: ${'$'}{uiState.filteredArticles.size}, Category: ${'$'}{uiState.selectedCategory}",
+                            text = "Debug: Total artikel: ${uiState.allArticles.size}, Filtered: ${uiState.filteredArticles.size}, Category: ${uiState.selectedCategory}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.error,
                             modifier = Modifier.padding(16.dp)
@@ -270,7 +270,7 @@ fun HeaderSection(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Halo, ${'$'}userName!",
+                    text = "Halo, $userName!",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Medium,
                     color = Color.White,
@@ -378,7 +378,7 @@ fun NewCollectionSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "New Collection",
+                text = "Artikel Terbaru",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -683,7 +683,7 @@ fun ArticleCard(
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 )
                 Text(
-                    text = "${'$'}{article.duration} min",
+                    text = "${article.duration} min",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
@@ -714,7 +714,7 @@ fun ArticleCard(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "+${'$'}{article.xp} XP",
+                    text = "+${article.xp} XP",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
