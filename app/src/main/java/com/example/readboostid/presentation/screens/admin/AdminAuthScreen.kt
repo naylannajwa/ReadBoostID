@@ -33,8 +33,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun AdminAuthScreen(
     onNavigateBack: () -> Unit,
-    onNavigateToAdminPanel: () -> Unit,
-    onNavigateToAdminRegister: () -> Unit = {}
+    onNavigateToAdminPanel: () -> Unit
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as? ReadBoostApplication
@@ -79,8 +78,7 @@ fun AdminAuthScreen(
                     uiState = uiState,
                     onUsernameChange = adminAuthViewModel::onUsernameChange,
                     onPasswordChange = adminAuthViewModel::onPasswordChange,
-                    onLoginClick = { adminAuthViewModel.login() },
-                    onRegisterClick = onNavigateToAdminRegister
+                    onLoginClick = { adminAuthViewModel.login() }
                 )
             }
 
@@ -223,8 +221,7 @@ fun AdminAuthForm(
     uiState: AdminAuthUiState,
     onUsernameChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
-    onLoginClick: () -> Unit,
-    onRegisterClick: () -> Unit
+    onLoginClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -346,24 +343,6 @@ fun AdminAuthForm(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Register button
-        OutlinedButton(
-            onClick = onRegisterClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            shape = RoundedCornerShape(12.dp),
-            border = BorderStroke(2.dp, Color(0xFF1976D2)) // Blue border
-        ) {
-            Text(
-                text = "Daftar Admin Baru",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
-                    color = Color(0xFF1976D2) // Blue color
-            )
-        }
 
         // General error message
         if (uiState.errorMessage != null) {

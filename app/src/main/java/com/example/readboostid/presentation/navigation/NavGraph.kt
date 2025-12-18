@@ -13,7 +13,6 @@ import com.readboost.id.presentation.screens.welcome.WelcomeScreen
 import com.readboost.id.presentation.screens.auth.LoginScreen
 import com.readboost.id.presentation.screens.auth.RegistrationScreen
 import com.readboost.id.presentation.screens.admin.AdminAuthScreen
-import com.readboost.id.presentation.screens.admin.AdminRegisterScreen
 import com.readboost.id.presentation.screens.admin.AdminDashboardScreen
 import com.readboost.id.presentation.screens.admin.AdminScreen
 import com.readboost.id.presentation.screens.admin.EditArticleScreen
@@ -39,7 +38,9 @@ fun NavGraph(
             SplashScreen(
                 onNavigateToLogin = {
                     navController.navigate(Screen.Login.route) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
+                        popUpTo(Screen.Splash.route) { 
+                            inclusive = true 
+                        }
                     }
                 }
             )
@@ -60,7 +61,9 @@ fun NavGraph(
             LoginScreen(
                 onNavigateToHome = {
                     navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
+                        popUpTo(Screen.Login.route) {
+                            inclusive = true
+                        }
                     }
                 },
                 onNavigateToRegister = {
@@ -73,7 +76,9 @@ fun NavGraph(
             RegistrationScreen(
                 onNavigateToLogin = {
                     navController.navigate(Screen.Login.route) {
-                        popUpTo(Screen.Registration.route) { inclusive = true }
+                        popUpTo(Screen.Registration.route) {
+                            inclusive = true
+                        }
                     }
                 }
             )
@@ -175,11 +180,10 @@ fun NavGraph(
                 onNavigateBack = { navController.navigateUp() },
                 onNavigateToAdminPanel = {
                     navController.navigate(Screen.AdminDashboard.route) {
-                        popUpTo(Screen.AdminAuth.route) { inclusive = true }
+                        popUpTo(Screen.AdminAuth.route) {
+                            inclusive = true
+                        }
                     }
-                },
-                onNavigateToAdminRegister = {
-                    navController.navigate(Screen.AdminRegister.route)
                 }
             )
         }
@@ -200,22 +204,13 @@ fun NavGraph(
             )
         }
 
-        composable(Screen.AdminRegister.route) {
-            AdminRegisterScreen(
-                onNavigateBack = { navController.navigateUp() },
-                onNavigateToAdminLogin = {
-                    navController.navigate(Screen.AdminAuth.route) {
-                        popUpTo(Screen.AdminRegister.route) { inclusive = true }
-                    }
-                }
-            )
-        }
-
         composable(Screen.Admin.route) {
             AdminScreen(
                 onNavigateBack = {
                     navController.navigate(Screen.AdminDashboard.route) {
-                        popUpTo(Screen.AdminDashboard.route) { inclusive = true }
+                        popUpTo(Screen.AdminDashboard.route) {
+                            inclusive = true
+                        }
                     }
                 },
                 onNavigateToAddArticle = {
@@ -238,7 +233,9 @@ fun NavGraph(
                 onNavigateBack = { navController.navigateUp() },
                 onArticleAdded = {
                     navController.navigate(Screen.Admin.route) {
-                        popUpTo(Screen.Admin.route) { inclusive = true }
+                        popUpTo(Screen.Admin.route) {
+                            inclusive = true
+                        }
                     }
                 }
             )
@@ -256,7 +253,9 @@ fun NavGraph(
                 onNavigateBack = { navController.navigateUp() },
                 onArticleUpdated = {
                     navController.navigate(Screen.Admin.route) {
-                        popUpTo(Screen.Admin.route) { inclusive = true }
+                        popUpTo(Screen.Admin.route) {
+                            inclusive = true
+                        }
                     }
                 }
             )

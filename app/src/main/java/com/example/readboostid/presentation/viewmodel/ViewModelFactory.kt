@@ -51,9 +51,6 @@ class ViewModelFactory(
             modelClass.isAssignableFrom(com.readboost.id.presentation.screens.admin.AddArticleViewModel::class.java) -> {
                 com.readboost.id.presentation.screens.admin.AddArticleViewModel(appContainer.articleRepository) as T
             }
-            modelClass.isAssignableFrom(com.readboost.id.presentation.screens.admin.AdminRegisterViewModel::class.java) -> {
-                com.readboost.id.presentation.screens.admin.AdminRegisterViewModel(appContainer.articleRepository, appContainer.userPreferences) as T
-            }
             modelClass.isAssignableFrom(com.readboost.id.presentation.screens.admin.EditArticleViewModel::class.java) -> {
                 com.readboost.id.presentation.screens.admin.EditArticleViewModel(appContainer.articleRepository) as T
             }

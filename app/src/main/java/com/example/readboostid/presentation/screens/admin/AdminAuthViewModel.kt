@@ -31,6 +31,29 @@ class AdminAuthViewModel(
     private val _uiState = MutableStateFlow(AdminAuthUiState())
     val uiState: StateFlow<AdminAuthUiState> = _uiState.asStateFlow()
 
+    companion object {
+        // In-memory storage for demo (in real app, use secure AdminUser table)
+        private val adminCredentials = mutableMapOf<String, String>()
+
+        init {
+            // Initialize with default admin
+            adminCredentials["admin"] = "admin123"
+            adminCredentials["superadmin"] = "super123"
+        }
+
+        fun isValidAdmin(username: String, password: String): Boolean {
+            return adminCredentials[username] == password
+        }
+
+        fun getAdminName(username: String): String {
+            return when (username) {
+                "admin" -> "Administrator"
+                "superadmin" -> "Super Admin"
+                else -> "Admin"
+            }
+        }
+    }
+
     fun onUsernameChange(username: String) {
         _uiState.value = _uiState.value.copy(
             username = username,
@@ -82,9 +105,9 @@ class AdminAuthViewModel(
         viewModelScope.launch {
             try {
                 // Check admin credentials using shared validation
-                if (AdminRegisterViewModel.isValidAdmin(currentState.username, currentState.password)) {
+                if (AdminAuthViewModel.isValidAdmin(currentState.username, currentState.password)) {
                     // Save admin session data
-                    val adminName = AdminRegisterViewModel.getAdminName(currentState.username)
+                    val adminName = AdminAuthViewModel.getAdminName(currentState.username)
                     val currentAdmin = CurrentUser(
                         id = 1, // Admin ID
                         username = currentState.username,
