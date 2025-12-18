@@ -4,6 +4,7 @@ package com.readboost.id.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.readboost.id.di.AppContainer
+import com.readboost.id.presentation.screens.admin.AdminViewModel
 import com.readboost.id.presentation.screens.article.ArticleDetailViewModel
 import com.readboost.id.presentation.screens.article.ArticleViewModel
 import com.readboost.id.presentation.screens.auth.LoginViewModel
@@ -40,6 +41,24 @@ class ViewModelFactory(
             }
             modelClass.isAssignableFrom(RegistrationViewModel::class.java) -> {
                 RegistrationViewModel(appContainer.userRepository) as T
+            }
+            modelClass.isAssignableFrom(AdminViewModel::class.java) -> {
+                AdminViewModel(appContainer.articleRepository) as T
+            }
+            modelClass.isAssignableFrom(com.readboost.id.presentation.screens.admin.AdminAuthViewModel::class.java) -> {
+                com.readboost.id.presentation.screens.admin.AdminAuthViewModel(appContainer.articleRepository, appContainer.userPreferences) as T
+            }
+            modelClass.isAssignableFrom(com.readboost.id.presentation.screens.admin.AddArticleViewModel::class.java) -> {
+                com.readboost.id.presentation.screens.admin.AddArticleViewModel(appContainer.articleRepository) as T
+            }
+            modelClass.isAssignableFrom(com.readboost.id.presentation.screens.admin.AdminRegisterViewModel::class.java) -> {
+                com.readboost.id.presentation.screens.admin.AdminRegisterViewModel(appContainer.articleRepository, appContainer.userPreferences) as T
+            }
+            modelClass.isAssignableFrom(com.readboost.id.presentation.screens.admin.EditArticleViewModel::class.java) -> {
+                com.readboost.id.presentation.screens.admin.EditArticleViewModel(appContainer.articleRepository) as T
+            }
+            modelClass.isAssignableFrom(com.readboost.id.presentation.screens.admin.AdminDashboardViewModel::class.java) -> {
+                com.readboost.id.presentation.screens.admin.AdminDashboardViewModel(appContainer.articleRepository) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }

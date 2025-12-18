@@ -12,6 +12,7 @@ data class User(
     val email: String,
     val passwordHash: String,
     val fullName: String,
+    val role: String = "user", // "user" or "admin"
     val createdAt: Long = System.currentTimeMillis(),
     val isActive: Boolean = true
 )
@@ -21,5 +22,6 @@ data class CurrentUser(
     val id: Int,
     val username: String,
     val fullName: String,
-    val email: String
+    val email: String,
+    val role: String = "user"
 )

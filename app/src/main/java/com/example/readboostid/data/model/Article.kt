@@ -17,5 +17,6 @@ data class Article(
     val category: String, // Sains, Teknologi, Psikologi, dll
     val difficulty: String = "Dasar", // Dasar, Menengah, Lanjut
     val xp: Int = 10,
-    val imageUrl: String? = null // URL gambar artikel
+    val imageUrl: String? = null, // URL gambar artikel
+    val createdAt: Long = System.currentTimeMillis() // Timestamp pembuatan
 ) : Parcelable

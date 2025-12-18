@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
         AdminUser::class,
         User::class
     ],
-    version = 3,
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -111,7 +111,8 @@ Di Indonesia, pengembangan AI semakin pesat dengan munculnya berbagai startup te
                     category = "Teknologi",
                     difficulty = "Dasar",
                     xp = 15,
-                    imageUrl = "https://picsum.photos/seed/ai/300/400"
+                    imageUrl = "https://picsum.photos/seed/ai/300/400",
+                    createdAt = System.currentTimeMillis() - (2 * 24 * 60 * 60 * 1000L) // 2 hari yang lalu
                 ),
                 Article(
                     title = "Psikologi Kebahagiaan dalam Kehidupan Sehari-hari",
@@ -128,7 +129,8 @@ Penting untuk memahami bahwa kebahagiaan bukanlah tujuan akhir, melainkan perjal
                     category = "Psikologi",
                     difficulty = "Dasar",
                     xp = 12,
-                    imageUrl = "https://picsum.photos/seed/psikologi/300/400"
+                    imageUrl = "https://picsum.photos/seed/psikologi/300/400",
+                    createdAt = System.currentTimeMillis() // Hari ini
                 ),
                 Article(
                     title = "Sejarah Internet: Dari ARPANET hingga Era Modern",
@@ -145,7 +147,8 @@ Internet telah merevolusi hampir setiap aspek kehidupan modern, dari pendidikan 
                     category = "Sejarah",
                     difficulty = "Menengah",
                     xp = 18,
-                    imageUrl = "https://picsum.photos/seed/internet/300/400"
+                    imageUrl = "https://picsum.photos/seed/internet/300/400",
+                    createdAt = System.currentTimeMillis() // Hari ini
                 ),
                 Article(
                     title = "Fotosintesis: Proses Kehidupan Tumbuhan",
@@ -459,19 +462,22 @@ Konservasi hutan hujan tropis Indonesia sangat penting untuk menjaga keanekaraga
                     username = "user",
                     email = "user@test.com",
                     passwordHash = hashPassword("user123"),
-                    fullName = "User Test"
+                    fullName = "User Test",
+                    role = "user"
                 ),
                 User(
                     username = "admin",
                     email = "admin@test.com",
                     passwordHash = hashPassword("admin123"),
-                    fullName = "Admin Test"
+                    fullName = "Admin Test",
+                    role = "admin"
                 ),
                 User(
                     username = "nayla",
                     email = "nayla@test.com",
                     passwordHash = hashPassword("nayla123"),
-                    fullName = "Nayla Jihana"
+                    fullName = "Nayla Jihana",
+                    role = "user"
                 )
             )
             dummyUsers.forEach { userDao.insertUser(it) }

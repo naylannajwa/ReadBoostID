@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.readboost.id.presentation.navigation.NavGraph
+import com.readboost.id.presentation.navigation.Screen
 import com.readboost.id.ui.theme.ReadBoostTheme
 
 /**
@@ -39,7 +40,11 @@ class MainActivity : ComponentActivity() {
                         color = MaterialTheme.colorScheme.background
                     ) {
                         val navController = rememberNavController()
-                        NavGraph(navController = navController)
+
+                        // Check for existing session and set appropriate start destination
+                        val startDestination = getStartDestinationBasedOnSession()
+
+                        NavGraph(navController = navController, startDestination = startDestination)
                     }
                 }
             }
@@ -48,6 +53,23 @@ class MainActivity : ComponentActivity() {
             Log.e("MainActivity", "Critical error in setContent", e)
             // Show error to user if needed
             finish()
+        }
+    }
+
+    private fun getStartDestinationBasedOnSession(): String {
+        return try {
+            val app = applicationContext as? ReadBoostApplication
+            val userPreferences = app?.appContainer?.userPreferences
+            val currentUser = userPreferences?.getCurrentUser()
+
+            when {
+                currentUser?.role == "admin" -> Screen.AdminDashboard.route
+                currentUser != null -> Screen.Home.route
+                else -> Screen.Welcome.route
+            }
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error checking session", e)
+            Screen.Welcome.route
         }
     }
 }

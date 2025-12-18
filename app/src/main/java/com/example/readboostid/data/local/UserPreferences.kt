@@ -15,6 +15,7 @@ class UserPreferences(context: Context) {
             putString(KEY_USERNAME, user.username)
             putString(KEY_FULL_NAME, user.fullName)
             putString(KEY_EMAIL, user.email)
+            putString(KEY_ROLE, user.role)
             putBoolean(KEY_IS_LOGGED_IN, true)
             apply()
         }
@@ -28,9 +29,10 @@ class UserPreferences(context: Context) {
         val username = prefs.getString(KEY_USERNAME, "") ?: ""
         val fullName = prefs.getString(KEY_FULL_NAME, "") ?: ""
         val email = prefs.getString(KEY_EMAIL, "") ?: ""
+        val role = prefs.getString(KEY_ROLE, "user") ?: "user"
 
         return if (id != -1 && username.isNotEmpty() && fullName.isNotEmpty()) {
-            CurrentUser(id, username, fullName, email)
+            CurrentUser(id, username, fullName, email, role)
         } else {
             null
         }
@@ -53,6 +55,7 @@ class UserPreferences(context: Context) {
         private const val KEY_USERNAME = "username"
         private const val KEY_FULL_NAME = "full_name"
         private const val KEY_EMAIL = "email"
+        private const val KEY_ROLE = "role"
         private const val KEY_IS_LOGGED_IN = "is_logged_in"
     }
 }

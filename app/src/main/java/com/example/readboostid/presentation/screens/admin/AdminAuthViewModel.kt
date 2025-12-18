@@ -1,18 +1,19 @@
-// File: presentation/screens/auth/LoginViewModel.kt
-package com.readboost.id.presentation.screens.auth
+// File: presentation/screens/admin/AdminAuthViewModel.kt
+package com.readboost.id.presentation.screens.admin
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.readboost.id.data.local.UserPreferences
+import com.readboost.id.data.model.AdminUser
 import com.readboost.id.data.model.CurrentUser
-import com.readboost.id.domain.repository.UserRepository
+import com.readboost.id.domain.repository.ArticleRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.security.MessageDigest
 
-data class LoginUiState(
+data class AdminAuthUiState(
     val username: String = "",
     val password: String = "",
     val usernameError: String? = null,
@@ -22,19 +23,13 @@ data class LoginUiState(
     val loginSuccess: Boolean = false
 )
 
-class LoginViewModel(
-    private val userRepository: UserRepository,
+class AdminAuthViewModel(
+    private val articleRepository: ArticleRepository,
     private val userPreferences: UserPreferences
 ) : ViewModel() {
 
-    fun loginAsAdmin(username: String, password: String) {
-        // This will be handled by checking admin_users table
-        // For now, just use regular user login with admin role check
-        login()
-    }
-
-    private val _uiState = MutableStateFlow(LoginUiState())
-    val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(AdminAuthUiState())
+    val uiState: StateFlow<AdminAuthUiState> = _uiState.asStateFlow()
 
     fun onUsernameChange(username: String) {
         _uiState.value = _uiState.value.copy(
@@ -61,12 +56,12 @@ class LoginViewModel(
         var passwordError: String? = null
 
         if (currentState.username.isBlank()) {
-            usernameError = "Username tidak boleh kosong"
+            usernameError = "Username admin tidak boleh kosong"
             hasError = true
         }
 
         if (currentState.password.isBlank()) {
-            passwordError = "Password tidak boleh kosong"
+            passwordError = "Password admin tidak boleh kosong"
             hasError = true
         }
 
@@ -86,36 +81,28 @@ class LoginViewModel(
 
         viewModelScope.launch {
             try {
-                val passwordHash = hashPassword(currentState.password)
-                val result = userRepository.loginUser(currentState.username, passwordHash)
+                // Check admin credentials using shared validation
+                if (AdminRegisterViewModel.isValidAdmin(currentState.username, currentState.password)) {
+                    // Save admin session data
+                    val adminName = AdminRegisterViewModel.getAdminName(currentState.username)
+                    val currentAdmin = CurrentUser(
+                        id = 1, // Admin ID
+                        username = currentState.username,
+                        fullName = adminName,
+                        email = "${currentState.username}@admin.com",
+                        role = "admin"
+                    )
+                    userPreferences.saveCurrentUser(currentAdmin)
 
-                result.onSuccess { user ->
-                    if (user != null) {
-                        // Save user data to preferences
-                        val currentUser = CurrentUser(
-                            id = user.id,
-                            username = user.username,
-                            fullName = user.fullName,
-                            email = user.email,
-                            role = user.role
-                        )
-                        userPreferences.saveCurrentUser(currentUser)
-
-                        _uiState.value = _uiState.value.copy(
-                            isLoading = false,
-                            loginSuccess = true,
-                            errorMessage = null
-                        )
-                    } else {
-                        _uiState.value = _uiState.value.copy(
-                            isLoading = false,
-                            errorMessage = "Username atau password salah"
-                        )
-                    }
-                }.onFailure { exception ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        errorMessage = "Terjadi kesalahan: ${exception.message}"
+                        loginSuccess = true,
+                        errorMessage = null
+                    )
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        errorMessage = "Username atau password admin salah"
                     )
                 }
             } catch (e: Exception) {

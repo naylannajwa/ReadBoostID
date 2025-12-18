@@ -50,7 +50,7 @@ private fun getMockAuthor(article: Article): String {
 // Helper function untuk mendapatkan image URL
 // Jika imageUrl ada di Article, gunakan itu. Jika tidak, gunakan placeholder
 private fun getArticleImageUrl(article: Article): String {
-    return article.imageUrl ?: "https://picsum.photos/seed/${article.id}/300/400"
+    return article.imageUrl ?: "https://picsum.photos/seed/${'$'}{article.id}/300/400"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,15 +59,21 @@ fun HomeScreen(
     onNavigateToArticleList: () -> Unit,
     onNavigateToProfile: () -> Unit,
     onNavigateToLeaderboard: () -> Unit,
-    onNavigateToArticle: (Int) -> Unit
+    onNavigateToArticle: (Int) -> Unit,
+    onLogout: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as? ReadBoostApplication
 
-    // Get current user name
-    val currentUserName = remember {
-        app?.appContainer?.userPreferences?.getCurrentUser()?.fullName ?: "User"
+    // Get current user
+    val currentUser = remember {
+        app?.appContainer?.userPreferences?.getCurrentUser()
     }
+    val currentUserName = currentUser?.fullName ?: "User"
+    val isLoggedIn = currentUser != null
+
+    // State for logout confirmation dialog
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
     // ViewModel initialization
     val homeViewModel = viewModel<HomeViewModel>(
@@ -78,6 +84,31 @@ fun HomeScreen(
         }
     )
     val uiState by homeViewModel.uiState.collectAsState()
+
+    // Logout confirmation dialog
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text(text = "Konfirmasi Logout") },
+            text = { Text("Apakah Anda yakin ingin logout dari akun Anda?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showLogoutDialog = false
+                        onLogout() // Execute the logout action
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
+                ) {
+                    Text("Logout", color = Color.White)
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { showLogoutDialog = false }) {
+                    Text("Batal")
+                }
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -114,7 +145,9 @@ fun HomeScreen(
                     HeaderSection(
                         searchQuery = "",
                         onSearchQueryChange = { },
-                        userName = currentUserName
+                        userName = currentUserName,
+                        isLoggedIn = isLoggedIn,
+                        onLogout = { showLogoutDialog = true } // Show dialog on click
                     )
                 }
 
@@ -145,7 +178,7 @@ fun HomeScreen(
                     // Debug: Tampilkan jumlah artikel
                     if (uiState.filteredArticles.isEmpty() && uiState.allArticles.isNotEmpty()) {
                         Text(
-                            text = "Debug: Total artikel: ${uiState.allArticles.size}, Filtered: ${uiState.filteredArticles.size}, Category: ${uiState.selectedCategory}",
+                            text = "Debug: Total artikel: ${'$'}{uiState.allArticles.size}, Filtered: ${'$'}{uiState.filteredArticles.size}, Category: ${'$'}{uiState.selectedCategory}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.error,
                             modifier = Modifier.padding(16.dp)
@@ -170,7 +203,9 @@ fun HomeScreen(
 fun HeaderSection(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
-    userName: String = "User"
+    userName: String = "User",
+    isLoggedIn: Boolean = false,
+    onLogout: () -> Unit = {}
 ) {
     // Background biru dengan rounded bottom
     Box(
@@ -212,6 +247,19 @@ fun HeaderSection(
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
+
+                // Logout button for logged in users
+                if (isLoggedIn) {
+                    Spacer(modifier = Modifier.weight(1f)) // Pushes logout to the end
+                    IconButton(onClick = onLogout) {
+                        Icon(
+                            imageVector = Icons.Default.Logout,
+                            contentDescription = "Logout",
+                            tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -222,7 +270,7 @@ fun HeaderSection(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Halo, $userName!",
+                    text = "Halo, ${'$'}userName!",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Medium,
                     color = Color.White,
@@ -275,6 +323,7 @@ fun HeaderSection(
                 query = searchQuery,
                 onQueryChange = onSearchQueryChange
             )
+
         }
     }
 }
@@ -634,7 +683,7 @@ fun ArticleCard(
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 )
                 Text(
-                    text = "${article.duration} min",
+                    text = "${'$'}{article.duration} min",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
@@ -665,7 +714,7 @@ fun ArticleCard(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "+${article.xp} XP",
+                    text = "+${'$'}{article.xp} XP",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -768,7 +817,8 @@ fun HomeScreenPreview() {
                 item {
                     HeaderSection(
                         searchQuery = "",
-                        onSearchQueryChange = {}
+                        onSearchQueryChange = {},
+                        isLoggedIn = true
                     )
                 }
                 item {

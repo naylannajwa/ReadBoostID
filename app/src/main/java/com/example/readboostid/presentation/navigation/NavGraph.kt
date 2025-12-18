@@ -7,9 +7,16 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.readboostid.presentation.screens.admin.AddArticleScreen
 import com.readboost.id.presentation.screens.splash.SplashScreen
+import com.readboost.id.presentation.screens.welcome.WelcomeScreen
 import com.readboost.id.presentation.screens.auth.LoginScreen
 import com.readboost.id.presentation.screens.auth.RegistrationScreen
+import com.readboost.id.presentation.screens.admin.AdminAuthScreen
+import com.readboost.id.presentation.screens.admin.AdminRegisterScreen
+import com.readboost.id.presentation.screens.admin.AdminDashboardScreen
+import com.readboost.id.presentation.screens.admin.AdminScreen
+import com.readboost.id.presentation.screens.admin.EditArticleScreen
 import com.readboost.id.presentation.screens.home.HomeScreen
 import com.readboost.id.presentation.screens.article.ArticleListScreen
 import com.readboost.id.presentation.screens.article.ArticleDetailScreen
@@ -22,7 +29,7 @@ import com.readboost.id.presentation.screens.settings.SettingsScreen
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    startDestination: String = Screen.Login.route
+    startDestination: String = Screen.Welcome.route
 ) {
     NavHost(
         navController = navController,
@@ -34,6 +41,17 @@ fun NavGraph(
                     navController.navigate(Screen.Login.route) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }
+                }
+            )
+        }
+
+        composable(Screen.Welcome.route) {
+            WelcomeScreen(
+                onNavigateToUserLogin = {
+                    navController.navigate(Screen.Login.route)
+                },
+                onNavigateToAdminLogin = {
+                    navController.navigate(Screen.AdminAuth.route)
                 }
             )
         }
@@ -74,6 +92,12 @@ fun NavGraph(
                 },
                 onNavigateToArticle = { articleId ->
                     navController.navigate(Screen.ArticleDetail.createRoute(articleId))
+                },
+                onLogout = {
+                    // Clear user session and navigate to welcome
+                    navController.navigate(Screen.Welcome.route) {
+                        popUpTo(0) // Clear entire back stack
+                    }
                 }
             )
         }
@@ -143,6 +167,98 @@ fun NavGraph(
         composable(Screen.Settings.route) {
             SettingsScreen(
                 onNavigateBack = { navController.navigateUp() }
+            )
+        }
+
+        composable(Screen.AdminAuth.route) {
+            AdminAuthScreen(
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToAdminPanel = {
+                    navController.navigate(Screen.AdminDashboard.route) {
+                        popUpTo(Screen.AdminAuth.route) { inclusive = true }
+                    }
+                },
+                onNavigateToAdminRegister = {
+                    navController.navigate(Screen.AdminRegister.route)
+                }
+            )
+        }
+
+        composable(Screen.AdminDashboard.route) {
+            AdminDashboardScreen(
+                onNavigateToArticleManagement = {
+                    navController.navigate(Screen.Admin.route)
+                },
+                onNavigateToUserLogin = {
+                    navController.navigate(Screen.Login.route)
+                },
+                onLogout = {
+                    navController.navigate(Screen.Welcome.route) {
+                        popUpTo(0) // Clear entire back stack
+                    }
+                }
+            )
+        }
+
+        composable(Screen.AdminRegister.route) {
+            AdminRegisterScreen(
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToAdminLogin = {
+                    navController.navigate(Screen.AdminAuth.route) {
+                        popUpTo(Screen.AdminRegister.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Screen.Admin.route) {
+            AdminScreen(
+                onNavigateBack = {
+                    navController.navigate(Screen.AdminDashboard.route) {
+                        popUpTo(Screen.AdminDashboard.route) { inclusive = true }
+                    }
+                },
+                onNavigateToAddArticle = {
+                    navController.navigate(Screen.AddArticle.route)
+                },
+                onNavigateToEditArticle = { articleId ->
+                    navController.navigate(Screen.EditArticle.createRoute(articleId))
+                },
+                onLogout = {
+                    // Clear admin session and navigate to welcome
+                    navController.navigate(Screen.Welcome.route) {
+                        popUpTo(0) // Clear entire back stack
+                    }
+                }
+            )
+        }
+
+        composable(Screen.AddArticle.route) {
+            AddArticleScreen(
+                onNavigateBack = { navController.navigateUp() },
+                onArticleAdded = {
+                    navController.navigate(Screen.Admin.route) {
+                        popUpTo(Screen.Admin.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = Screen.EditArticle.route,
+            arguments = listOf(
+                navArgument("articleId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val articleId = backStackEntry.arguments?.getInt("articleId") ?: return@composable
+            EditArticleScreen(
+                articleId = articleId,
+                onNavigateBack = { navController.navigateUp() },
+                onArticleUpdated = {
+                    navController.navigate(Screen.Admin.route) {
+                        popUpTo(Screen.Admin.route) { inclusive = true }
+                    }
+                }
             )
         }
     }
